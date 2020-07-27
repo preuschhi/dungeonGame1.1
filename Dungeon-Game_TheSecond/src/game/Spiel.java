@@ -12,7 +12,7 @@ public class Spiel {
 		Spieler spielerID = spieler;
 		StandartSchwert waffe = new StandartSchwert();//Waffenobjekt als Startwaffe
 		spieler.setWaffe(waffe); // dem spieler wird die  Standartwaffe zugewiesen
-		Bogen bogen = new Bogen();
+		BambusBogen bogen = new BambusBogen();
 		spieler.setWaffe2(bogen);
 		
 		

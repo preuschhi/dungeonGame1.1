@@ -1,20 +1,22 @@
 package game;
 
-public class GegnerOlaf extends Gegner {
+public class GegnerBeber extends Gegner{
 
 	Waffe waffeGegner;
-
-	// Konstrukor
-	public GegnerOlaf() {
-		super("Olaf", 30, 0.5, 5, true);
-		StandartSchwert waffeGegnerOlaf = new StandartSchwert();
-		this.waffeGegner = waffeGegnerOlaf;
-	}
 	
-	// Methoden
-	public Waffe getWaffe () {
-		return this.waffeGegner;
+	
+	//Konstruktor
+	public GegnerBeber() {
+		super("Beber", 44, 0.75, 13, false);
+		BambusBogen waffeGegnerBeber =  new BambusBogen();
+		this.waffeGegner = waffeGegnerBeber;
+	
 	}
+
+	// Methoden
+		public Waffe getWaffe () {
+			return this.waffeGegner;
+		}
 	
 	@Override
 	public void angriff() {

@@ -1,13 +1,19 @@
 package game;
+
 import java.util.Scanner;
+
+
 
 public class Spieler {
 
 	// Eigenschaften
 	private String nameSpieler;
 	private int lebenSpieler;
-	Waffe waffeSpieler;
-	Waffe waffeSpieler2;
+	Waffe waffeSpieler; // Schwert
+	Waffe waffeSpieler2; // Bogen
+	 Waffe waffeSpielerZwischenSpeicher; // Dort werden die Informationen des WaffenObjekts zwischengespeichert
+												// welches
+	// für entweder, die Waffenkonfig oder die Gewählte kampfwaffe, verwendet wird.
 	Gegner gegner;
 	CustomArray inventar[]; // In dieser Klasse werden Anzahl und Name von Gegenständen gespeichert
 							// In diesem Fall "Heiltrank" & "Gold"
@@ -23,45 +29,17 @@ public class Spieler {
 
 	public void angriff(Spieler spielerID, CustomArray heiltrankID, CustomArray goldID) { // Über die IDs kann auf das
 																							// Objekt zugreifen
-																							// und damit arbeiten
-		
-		// Hier kommt ein zufallsgenerator der entscheiden soll welcher gegner erstellt
-		// wird
-		int min = 1;
-		int max = 3;
-		int zufallsZahl = min + (int) (Math.random() * ((max - min) + 1));
 
 		// Diese Kontrollstruktur erkennt welcher gegner erstellt werden soll und
 		// erstellt dieses Objekt
-		Gegner gegner = null;// Hier wird das Gegner Objekt erstellt
-
-		// Hier wird GegnerOlaf erstellt
-		if (zufallsZahl == 1) {
-
-			gegner = new GegnerOlaf();
-			setGegner(gegner);
-		}
-
-		// Hier wird GegnerJürgen erstellt
-		if (zufallsZahl == 2) {
-
-			gegner = new GegnerJürgen();
-			setGegner(gegner);
-		}
-
-		// Hier wird GegnerDieter erstellt
-		if (zufallsZahl == 3) {
-
-			gegner = new GegnerDieter();
-			setGegner(gegner);
-		}
+		gegnerAuswahl();
 
 		// Hier wird der aktuelle Gegner ermittelt und dessen Stats herausgefunden
 
 		System.out.println("=====================================\nDein aktueller Gegner: " + gegner.getName() + " hat "
 				+ gegner.getLeben() + " Leben.");
 		System.out.println(gegner.getName() + " hat die Waffe " + gegner.getWaffe().nameWaffe
-				+ ".\nSie hat diese Stats:\nSchaden:" + gegner.getWaffe().schadenWaffe);
+				+ ".\nSie hat diese Stats:\nSchaden: " + gegner.getWaffe().schadenWaffe);
 
 		// Hier läuft der eigentliche Angriff ab
 		boolean angriff = true;
@@ -72,12 +50,12 @@ public class Spieler {
 		 * kann, this.lebenGegner übertragen und lebenGegner wird auf 0 gesetzt.
 		 * 
 		 */
-		boolean waffeUmstellen = false;//Wenn dieser Bool auf False ist,
-									   //wird die WaffenKonifg aufgerufen
+		boolean waffeUmstellen = true;// Wenn dieser Bool auf False ist,
+										// wird die WaffenKonifg aufgerufen
 		while (angriff == true) {
 			spielerID.checkWaffeHaltbarkeit();// Hier wird geprüft ob die Waffe vom Spieler nochh Haltbarkeit hat. Wenn
-											  // nicht wird sie durch ein Standartschwert ersetzt.
-			
+												// nicht wird sie durch ein Standartschwert ersetzt.
+
 			// Erst wird abgefragt ob der Spieler angreifen will
 			System.out.println(
 					"===================================\nWillst du den Gegner angreifen?\n*Antworte mit\n[1]: Ja\n[2]: Nein");
@@ -86,7 +64,6 @@ public class Spieler {
 
 			// Hier wird der angriff abgebrochen
 			if (eingabeString.equals("2")) {
-
 				System.out.println("Du hast den Angriff abgebrochen!\n=========================================");
 				angriff = false;
 			}
@@ -94,13 +71,22 @@ public class Spieler {
 			// Wenn der Spieler den Gegner angreifen will, wird der Schaden der Spielerwaffe
 			// ermittelt und dem Gegner vom Leben abgezogen
 			else if (eingabeString.equals("1")) {
-				if (waffeUmstellen == false) {
-					waffeSpieler.waffenKonfiguration(spielerID);
+				if (waffeUmstellen == true) {		
+					System.out.println("Waffenkonfig");
+					Waffe waffe = new StandartSchwert();
+					waffe.waffenKonfiguration(spielerID);
+					waffe = null;
 				}
-				
-				gegner.setLeben(gegner.getLeben() - waffeSpieler.schadenWaffe);
+				waffeUmstellen = false;
+
+				// Nun bekommt der Spieler die möglichkeit sich seine Angriffswaffe auszusuchen.
+				setWaffeSpielerAngriff(scan, spielerID);
+
+				// Hier wird der Gegner Angegriffen. Ihm wird der Schaden der ausgewählten
+				// angriffsWaffe angezogen
+				gegner.setLeben(gegner.getLeben() - waffeSpielerZwischenSpeicher.schadenWaffe);
 				System.out.println("=============================================\nDu hast dem Gegner "
-						+ gegner.getName() + " " + this.waffeSpieler.schadenWaffe + " Leben abgezogen!");
+						+ gegner.getName() + " " + waffeSpielerZwischenSpeicher.schadenWaffe + " Leben abgezogen!");
 
 				// Hier wird überprüft ob der Gegner noch lebt
 				// Wenn der Gegner tot ist...
@@ -109,12 +95,19 @@ public class Spieler {
 					angriff = false;
 
 					System.out.println("Du hast den Gegner " + gegner.getName() + " besiegt!");
-					this.waffeSpieler.haltbarkeitWaffe = this.waffeSpieler.haltbarkeitWaffe
+					this.waffeSpielerZwischenSpeicher.haltbarkeitWaffe = this.waffeSpielerZwischenSpeicher.haltbarkeitWaffe
 							- gegner.spielerWaffeHaltbarkeitAbzug;
-					System.out.println("Deiner Waffe " + this.waffeSpieler.nameWaffe + " wurde "
+					System.out.println("Deiner Waffe " + this.waffeSpielerZwischenSpeicher.nameWaffe + " wurde "
 							+ gegner.spielerWaffeHaltbarkeitAbzug + " Haltbarkeit abgezogen!");
-					System.out.println("Deine Waffe " + this.waffeSpieler.nameWaffe + " hat noch "
-							+ this.waffeSpieler.haltbarkeitWaffe + " Hatlbarkeit!");
+					System.out.println("Deine Waffe " + this.waffeSpielerZwischenSpeicher.nameWaffe + " hat noch "
+							+ this.waffeSpielerZwischenSpeicher.haltbarkeitWaffe + " Hatlbarkeit!");
+
+					/*
+					 * Nachdem die Haltbarkeit von waffeSpielerZwischenSpeicher abgezogen wurde,
+					 * werden die Informationen von waffeSpielerZwischenSpeicher zurück in in die
+					 * Urspüngliche ObjektWaffenVariable gespeichert
+					 */
+					ueberSchreibeWaffeSpielerZwischenSpeicherInGenommenesWaffenObjekt();
 
 					System.out.println("Du hast " + goldID.getWertID() + " Gold!");
 					System.out.println("Du hast " + gegner.goldFuerSpieler + " Gold bekommen!");
@@ -135,9 +128,7 @@ public class Spieler {
 					}
 					// Der Spieler nimmt die Waffe
 					if (eingabeString.equals("1")) {
-
-						this.waffeSpieler = gegner.getWaffe();
-						System.out.println("Du hast die Waffe vom Gegner aufgehoben!");
+						nimmWaffeVonGegner();
 					}
 				}
 				// Wenn der gegner noch lebt...
@@ -159,24 +150,21 @@ public class Spieler {
 						// Erst wird überprüft Ob der Spieler heiltränke hat
 						// Wenn er welche hat....
 						if (heiltrankID.getWertID() > 0) {
-
 							System.out.println("Willst du dich Heilen?\n[1]: Ja\n[2]: Nein");
 							System.out.println("Du hast " + heiltrankID.getWertID() + " Heiltränke");
 							eingabeString = scan.nextLine();
 
 							// Wenn der Spieler nicht Heilen will
 							if (eingabeString.equals("2")) {
-
 								System.out.println("Du hast dich nicht geheilt!");
 
 								// Wenn der Spieler sich heilen will
 							} else if (eingabeString.equals("1")) {
-
 								heilen(heiltrankID);
 							}
 						}
+						// Wenn der Spieler tod ist.
 					} else if (getLeben() <= 0) {
-
 						System.out.println("Der Gegner " + gegner.getName() + " hat dich getötet! :(");
 						angriff = false;
 					}
@@ -226,13 +214,14 @@ public class Spieler {
 
 		this.waffeSpieler = waffeSpieler;
 	}
+
 	public void setWaffe2(Waffe waffeSpieler2) { // Hier wird dem Spieler eine Waffe zugewiesen
 
 		this.waffeSpieler2 = waffeSpieler2;
 	}
 
 	public void checkWaffeHaltbarkeit() {
-		//Für die Schwerter
+		// Für die Schwerter
 		if (waffeSpieler.haltbarkeitWaffe <= 0) {
 
 			StandartSchwert waffeSchwert = new StandartSchwert();
@@ -241,10 +230,10 @@ public class Spieler {
 					+ waffeSchwert.schadenWaffe + " Schaden!");
 			this.waffeSpieler = waffeSchwert;
 		}
-		//Für den Bogen
+		// Für den Bogen
 		if (waffeSpieler2.haltbarkeitWaffe <= 0) {
 
-			Waffe waffeBogen = new Bogen();
+			BambusBogen waffeBogen = new BambusBogen();
 			System.out.println("Deine aktuelle Waffe " + waffeSpieler2.nameWaffe
 					+ " ist kaputt.\nDu bekommst als Standartwaffe ein " + waffeBogen.nameWaffe + " mit "
 					+ waffeBogen.schadenWaffe + " Schaden!");
@@ -255,7 +244,8 @@ public class Spieler {
 	public void showInventar(CustomArray goldID, CustomArray heiltrankID) {
 		System.out.println("=======================\nDas ist dein Inventar:");
 
-		System.out.println("Name Waffe: " + waffeSpieler.nameWaffe + "\nSchaden Waffe: " + waffeSpieler.schadenWaffe
+		System.out.println("Name Schwert: " + waffeSpieler.nameWaffe + "\nSchaden Schwert: " + waffeSpieler.schadenWaffe
+				+ "\nName Bogen " + waffeSpieler2.nameWaffe + "\nSchaden Bogen: " + waffeSpieler2.schadenWaffe
 				+ "\nHeilränke: " + heiltrankID.getWertID() + "\nGold: " + goldID.getWertID()
 				+ "\n===============================");
 	}
@@ -286,8 +276,9 @@ public class Spieler {
 				return spielBeenden = false;
 			}
 			case "4": {
-				// Neun Raum erstellen, für Gegner
+				// Neuen Raum erstellen
 				erstelleRaum(goldID, heiltrankID);
+				auswahlMethode(goldID, heiltrankID, spielerID);
 				return spielBeenden = false;
 			}
 			case "5": {
@@ -336,21 +327,25 @@ public class Spieler {
 		int zufallsZahlhaendler = min2 + (int) (Math.random() * ((max2 - min2) + 1));
 
 		while (kauf == true) {
+			if (zufallsZahlhaendler != 1) {
+				System.out.println("In diesem Raum gibt es keinen Händler!\n========================================");
+				kauf = false;
+			}
 			if (zufallsZahlhaendler == 1) {
 
 				System.out.println("============================\nDu hast einen Händler gefunden!");
 				System.out.println("Du hast " + goldID.getWertID() + " Gold!");
 				System.out.println(
-						"Du kannst Heiltränke oder ein Schwert kaufen\nDas Schwert ist ein Diamant Schwert mit 55 Schaden und 3 Haltbarkeit");
-				System.out
-						.println("[1]: Schwert\n[2]: Heiltrank\n[3]: Abbrechen\n====================================");
+						"Du kannst Heiltränke 15 Gold, ein Schwert oder einen Bogen kaufen\nDas Schwert ist ein Diamant Schwert mit 18 Schaden und 3 Haltbarkeit 40 Gold\n"
+								+ "Der Bogen ist ein Diamant Bogen mit 20 Schaden und 4 Haltbarkeit 50 Gold.");
+				System.out.println(
+						"[1]: Schwert\n[2]: Bogen\n[3]: Heiltrank\n[4]: Abbrechen\n====================================");
 				Scanner scan = new Scanner(System.in);
 				String eingabeString = scan.nextLine();
 
 				// Hier wird gekauft
 				// Hier wird das Schwert gekauft
 				if (eingabeString.equals("1")) {
-
 					// Erst muss geprüft werden ob der Spieler genug gold hat
 					if (goldID.getWertID() >= 40) {
 
@@ -364,16 +359,39 @@ public class Spieler {
 																	// mit dem aktuellen WaffenObjekt des Spielers
 																	// ausgetauscht
 						this.waffeSpieler = diaSchwert;
-						System.out.println("Deine Waffe: " + this.waffeSpieler.nameWaffe + "\nSchaden: "
+						System.out.println("Dein Schwert: " + this.waffeSpieler.nameWaffe + "\nSchaden: "
 								+ this.waffeSpieler.schadenWaffe);
 
 					} else {
 
 						System.out.println("Du hast nicht genug Gold für das Schwert!");
 					}
-					// Hier wird der Heiltrank gekauft
-				} else if (eingabeString.equals("2")) {
 
+				}
+				if (eingabeString.equals("2")) {
+					// Erst muss geprüft werden ob der Spieler genug gold hat
+					if (goldID.getWertID() >= 50) {
+
+						System.out
+								.println("=======================================\nDu hast den Diamant Bogen gekauft!");
+						goldID.setWertID(goldID.getWertID() - 50);
+						System.out
+								.println("Dir wurden 50 Gold abgezogen. Du hast noch " + goldID.getWertID() + " Gold!");
+						DiaBogen diaBogen = new DiaBogen(); // Hier wird das DiaObjekt erstellt. Das DiaObjekt
+															// wird
+															// mit dem aktuellen WaffenObjekt des Spielers
+															// ausgetauscht
+						this.waffeSpieler2 = diaBogen;
+						System.out.println("Dein Bogen: " + this.waffeSpieler2.nameWaffe + "\nSchaden: "
+								+ this.waffeSpieler2.schadenWaffe);
+
+					} else {
+
+						System.out.println("Du hast nicht genug Gold für den Bogen!");
+					}
+
+					// Hier wird der Heiltrank gekauft
+				} else if (eingabeString.equals("3")) {
 					// Erst muss geprüft werden ob der Spieler genug gold hat
 					if (goldID.getWertID() >= 15) {
 
@@ -388,17 +406,131 @@ public class Spieler {
 
 						System.out.println("Du hast nicht genug Gold!");
 					}
-				} else if (eingabeString.equals("3")) {
+				} else if (eingabeString.equals("4")) {
 
 					System.out.println("Du hast den Einkauf abgebrochen!\n=============================");
 					kauf = false;
 				}
 
-			} else {
-
-				System.out.println("In diesem Raum gibt es keinen Händler!\n========================================");
-				kauf = false;
 			}
 		}
+	}
+
+	public void setWaffeSpielerZwischenSpeicher(Waffe waffeSpielerZwischenSpeicher, Spieler spielerID) { // Hier ist der setter für
+																						// waffeSpielerZischenSpieler
+		spielerID.waffeSpielerZwischenSpeicher = waffeSpielerZwischenSpeicher; // Einsatz -> waffenKonfig oder
+																			// kampfwaffenAuswahl
+	}
+
+	public Waffe getWaffeSpielerZwischenSpeicher() { // Dieser getter wird gebraucht um die ReferenzID von
+		return this.waffeSpielerZwischenSpeicher; // waffeSpielerZwischenSpeicher zu finden
+	}
+
+	public void ueberSchreibeWaffeSpielerZwischenSpeicherInGenommenesWaffenObjekt() { // Diese Methode überschreibt
+		/*
+		 * Diese Methode überschreit die die Zwischengespeicherten Informationen der
+		 * Variable waffeSpielerZwischenSpeicher in die passende ObjektVariable.
+		 * 
+		 * Sie kann aber auch den Typ (Bogen oder Schwert) der waffeGegner erkennen und
+		 * in die passende ObjektVariable speichern.
+		 */
+		// Bei Spieler Waffen
+		if (getWaffeSpielerZwischenSpeicher() == waffeSpieler) {
+			setWaffe(getWaffeSpielerZwischenSpeicher());
+		}
+		if (getWaffeSpielerZwischenSpeicher() == waffeSpieler2) {
+			setWaffe2(getWaffeSpielerZwischenSpeicher());
+		}
+		
+	}
+		
+	public void nimmWaffeVonGegner() {
+		/*
+		 * Bei Gegner Waffen Wenn man den Gegner getötet hat, kann man seine Waffe
+		 * looten. Wenn man das macht, erkennt dieser Teil der Methode den Typ der
+		 * gegnerWaffe (Bogen oder Schwert) und speichert es in die passende
+		 * ObjektVariable.
+		 */
+		// Schwertern
+		if (gegner.waffeGegnerBogenOSchwert == true) {
+			setWaffe(gegner.waffeGegner);
+			System.out.println("Du hast die Waffe vom Gegner aufgehoben!");
+		}
+		// Bogen
+		if (gegner.waffeGegnerBogenOSchwert == false) {
+			setWaffe2(gegner.waffeGegner);
+			System.out.println("Du hast die Waffe vom Gegner aufgehoben!");
+		}
+	}
+
+
+	public void setWaffeSpielerAngriff(Scanner scan, Spieler spielerID) {
+		/*
+		 * Diese Methode gibt dem Spieler die Möglichkeit sich eine Waffe, am anfang
+		 * jeder Attacke, auszusuchen. Diese Waffe wird in waffeSpielerZwischenSpeicher
+		 * gespeichert.
+		 */
+		System.out.println("Mit welcher Waffe willst du angreifen?\n" + "[1]Schwert: " + waffeSpieler.nameWaffe
+				+ "\n Schaden Real: " + waffeSpieler.schadenWaffeReal + "/ Schaden Standart" + waffeSpieler.schadenWaffe + "\n" + "[2]Bogen: " + waffeSpieler2.nameWaffe
+				+ "\nSchaden Real:" + waffeSpieler2.schadenWaffeReal + "/ Schaden Standart" + "/" + waffeSpieler2.schadenWaffe );
+		String eingabeString = scan.nextLine();
+		switch (eingabeString) {
+		case "1": {
+			setWaffeSpielerZwischenSpeicher(waffeSpieler, spielerID);
+			break;
+		}
+		case "2": {
+			setWaffeSpielerZwischenSpeicher(waffeSpieler2, spielerID);
+			break;
+		}
+		}
+	}
+
+	public void waffenKonfig(Spieler spielerID) {
+		spielerID.waffeSpieler.waffenKonfiguration(spielerID);
+	}
+	
+	public void gegnerAuswahl() {
+		// Hier kommt ein zufallsgenerator der entscheiden soll welcher gegner erstellt
+		// wird
+		int min = 1;
+		int max = 6;
+		int zufallsZahl = min + (int) (Math.random() * ((max - min) + 1));
+
+		// Diese Kontrollstruktur erkennt welcher gegner erstellt werden soll und
+		// erstellt dieses Objekt
+		Gegner gegner = null;// Hier wird das Gegner Objekt erstellt
+
+		// Hier wird GegnerOlaf erstellt
+		if (zufallsZahl == 1) {
+			gegner = new GegnerOlaf();
+			setGegner(gegner);
+		}
+		// Hier wird GegnerJürgen erstellt
+		if (zufallsZahl == 2) {
+			gegner = new GegnerJürgen();
+			setGegner(gegner);
+		}
+		// Hier wird GegnerDieter erstellt
+		if (zufallsZahl == 3) {
+			gegner = new GegnerDieter();
+			setGegner(gegner);
+		}
+		// Hier wird Gegner Beber erstellt
+		if (zufallsZahl == 4) {
+			gegner = new GegnerBeber();
+			setGegner(gegner);
+		}
+		// Hier Wird Gegner Flaga erstellt
+		if (zufallsZahl == 5) {
+			gegner = new GegnerFlaga();
+			setGegner(gegner);
+		}
+		// Hier wrird Gegner Wardo erstellt
+		if (zufallsZahl == 6) {
+			gegner = new GegnerWardo();
+			setGegner(gegner);
+		}
+
 	}
 }

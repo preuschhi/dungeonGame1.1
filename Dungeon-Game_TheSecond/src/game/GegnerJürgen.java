@@ -6,7 +6,7 @@ public class GegnerJürgen extends Gegner {
 
 	// Konstruktor
 	public GegnerJürgen() {
-		super("Jürgen", 45, 1, 10);
+		super("Jürgen", 45, 1, 10, true);
 		MittelStarkesSchwert waffeGegnerJuergen = new MittelStarkesSchwert();
 		this.waffeGegner = waffeGegnerJuergen;
 	}
@@ -33,7 +33,4 @@ public class GegnerJürgen extends Gegner {
 		// TODO Auto-generated method stub
 		
 	}
-
-	
-
 }
