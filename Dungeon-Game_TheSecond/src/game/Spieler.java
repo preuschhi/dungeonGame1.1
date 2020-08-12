@@ -508,7 +508,7 @@ public class Spieler {
 		}
 		// Hier wird GegnerJürgen erstellt
 		if (zufallsZahl == 2) {
-			gegner = new GegnerJürgen();
+			gegner = new GegnerJuergen();
 			setGegner(gegner);
 		}
 		// Hier wird GegnerDieter erstellt
